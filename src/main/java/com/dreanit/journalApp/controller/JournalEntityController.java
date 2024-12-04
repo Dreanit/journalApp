@@ -60,6 +60,7 @@ public class JournalEntityController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+
     @PutMapping("id/{id}")
     public ResponseEntity<?> updateJournalEntryById(@PathVariable ObjectId id, @RequestBody JournalEntry newEntry) {
 
