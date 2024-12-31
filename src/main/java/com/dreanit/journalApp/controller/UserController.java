@@ -7,6 +7,8 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,37 +20,24 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getEntries();
-    }
-
-
-    @PostMapping
-    public void createUser(@RequestBody User user) {
-        userService.saveUser(user);
-    }
-
-    @GetMapping("id/{id}")
-    public User getUserById(@PathVariable ObjectId id) {
-        return userService.getEntryById(id).orElse(null);
-    }
-
-    @DeleteMapping
-    public boolean deleteUserByUserName(@PathVariable ObjectId id) {
-//        userService.deleteByUserName(id);
-        return true;
-    }
-
     @PutMapping
     public ResponseEntity<?> updateUser(@RequestBody User user) {
-
-        User old = userService.findByUserName(user.getUserName());
+        Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
+        String userName=authentication.getName();
+        User old = userService.findByUserName(userName);
         if(old!=null){
             old.setUserName(user.getUserName());
             old.setPassword(user.getPassword());
             userService.saveUser(old);
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping()
+    public boolean deleteUserByUserName() {
+        Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
+        String userName=authentication.getName();
+        userService.deleteByUserName(userName);
+        return true;
     }
 }
